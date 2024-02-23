@@ -1,26 +1,44 @@
-import turtle
-import time
+from turtle import *
 import random
+import time
 
-score = 0
-high_score = 0
 
-#set up the screen
-win = turtle.Screen()
-win.title("Yasir's Snake Game")
+#Screen
+win = Screen()
 win.bgcolor("gold")
+win.title("Snake Game")
 win.setup(600,600)
 win.tracer(0)
 
 #Snake Head
-head = turtle.Turtle()
-head.speed(0)
+head = Turtle()
 head.shape("square")
-head.color("black")
+head.color("navy")
 head.penup()
+head.speed(0)
 head.direction = "stop"
 
+#Snake Food
+food = Turtle()
+food.shape("circle")
+food.color("red")
+food.shapesize(0.6,0.6)
+food.penup()
+food.speed(0)
+food.direction="stop"
+food.goto(0,50)
 
+#pen
+pen = Turtle()
+pen.color("black")
+pen.hideturtle()
+pen.penup()
+pen.speed(0)
+pen.direction="stop"
+pen.goto(0,270)
+pen.write("Score: 0    High Score: 0",align="center",font=("Calibri",20,"bold"))
+
+#Move function
 def move():
     if head.direction == "up":
         y = head.ycor()
@@ -46,60 +64,44 @@ def go_down():
     if head.direction != "up":
         head.direction = "down"
 
-def go_left():
-    if head.direction != "right":
-        head.direction = "left"
-
 def go_right():
     if head.direction != "left":
         head.direction = "right"
 
-#Buttons to move
+def go_left():
+    if head.direction != "right":
+        head.direction = "left"
+
 win.listen()
 win.onkey(go_up,"w")
-win.onkey(go_down, "s")
+win.onkey(go_down,"s")
+win.onkey(go_right,"d")
 win.onkey(go_left,"a")
-win.onkey(go_right, "d")
-
-
-#Snake Food
-food = turtle.Turtle()
-food.speed(0)
-food.shape("circle")
-food.color("red")
-food.penup()
-food.shapesize(0.7,0.7)
-food.goto(0,50)
-
-#Pen
-pen = turtle.Turtle()
-pen.speed(0)
-pen.shape("square")
-pen.color("purple")
-pen.penup()
-pen.hideturtle()
-pen.goto(0,260)
-pen.write("Score: 0    High Score: 0", align="center", font=("Courier", 18, "bold"))
-
-#Pen2
-pen2 = turtle.Turtle()
-pen2.speed(0)
-pen2.shape("square")
-pen2.color("red")
-pen2.penup()
-pen2.hideturtle()
-pen2.goto(0,50)
-
 
 segment = []
+score=0
+high_score=0
 
-#Main game loop
+target = 5 #You can set any target to be a snake master
+
+#MainLoop
 while True:
     win.update()
 
-    #Check for border collision
-    if head.xcor() > 290 or head.xcor() < -290 or head.ycor() > 290 or head.ycor() < -290:
-        time.sleep(.7)
+    #Check border hitting
+    if head.xcor()>290 or head.xcor()<-290 or head.ycor()>290 or head.ycor()<-290:
+        time.sleep(0.5)
+        pen.clear()
+        pen.goto(0,0)
+        pen.write("Game Over!",align="center",font=("Calibri",20,"bold"))
+        time.sleep(1)
+        pen.clear()
+        pen.write("Restarting...",align="center",font=("Calibri",20,"bold"))
+        time.sleep(0.5)
+        pen.clear()
+        pen.goto(0,270)
+        score=0
+        pen.write("Score: {}    High Score: {}".format(score,high_score),align="center",font=("Calibri",20,"bold"))
         head.goto(0,0)
         head.direction = "stop"
 
@@ -107,59 +109,56 @@ while True:
             i.goto(1000,1000)
 
         segment.clear()
-        
-        pen2.write("Game Over", align='center', font=("Comic Sans MS", 24, "bold"))
-        time.sleep(0.75)
-        pen2.clear()
-        pen2.write("Start Again", align='center', font=("Comic Sans MS", 24, "bold"))
-        time.sleep(0.5)
-        pen2.clear()
-        
-        score = 0
-        pen.clear()
-        pen.write("Score: {}    High Score: {}".format(score, high_score), align="center", font=("Courier", 16, "bold"))    
 
-            
 
-    if head.distance(food) < 15:
-        x = random.randint(-250,250)
-        y = random.randint(-250,250)
+    #Food Eating
+    if head.distance(food) < 20:
+        x = random.randint(-280,280)
+        y = random.randint(-280,280)
         food.goto(x,y)
 
-        #add a new segment
-        new_segment = turtle.Turtle()
-        new_segment.speed(0)
-        new_segment.shape("square")
-        new_segment.color("white smoke")
-        new_segment.penup()
-        segment.append(new_segment)
-
-        #Update the score
-        score+=10
-
-        if score>high_score:
+        score+=1
+        if score > high_score:
             high_score = score
-
         pen.clear()
-        pen.write("Score: {}    High Score: {}".format(score, high_score), align="center", font=("Courier", 16, "bold"))    
-    
-    #move the end segment in reverse order
-    for i in range(len(segment)-1, 0, -1):
+        pen.write("Score: {}    High Score: {}".format(score,high_score),align="center",font=("Calibri",20,"bold"))
+
+
+
+        ns = Turtle()
+        ns.shape("square")
+        ns.color("grey")
+        ns.penup()
+        ns.speed(0)
+        ns.direction="stop"
+        segment.append(ns)
+
+    for i in range(len(segment)-1, 0,-1):
         x = segment[i-1].xcor()
         y = segment[i-1].ycor()
         segment[i].goto(x,y)
 
-    if len(segment) > 0:
+    if len(segment)>0:
         x = head.xcor()
         y = head.ycor()
         segment[0].goto(x,y)
 
     move()
-    
-    #Check for body collision
+
     for i in segment:
-        if i.distance(head) < 20:
+        if i.distance(head)<20:
             time.sleep(0.5)
+            pen.clear()
+            pen.goto(0,0)
+            pen.write("Game Over!",align="center",font=("Calibri",20,"bold"))
+            time.sleep(1)
+            pen.clear()
+            pen.write("Restarting...",align="center",font=("Calibri",20,"bold"))
+            time.sleep(0.5)
+            pen.clear()
+            pen.goto(0,270)
+            score=0
+            pen.write("Score: {}    High Score: {}".format(score,high_score),align="center",font=("Calibri",20,"bold"))
             head.goto(0,0)
             head.direction = "stop"
 
@@ -167,37 +166,11 @@ while True:
                 i.goto(1000,1000)
 
             segment.clear()
-
-            pen2.write("Game Over", align='center', font=("Comic Sans MS", 24, "bold"))
-            time.sleep(0.5)
-            pen2.clear()
-            pen2.write("Start Again", align='center', font=("Comic Sans MS", 24, "bold"))
-            time.sleep(0.3)
-            pen2.clear()
-
-            score = 0
-            pen.clear()
-            pen.write("Score: {}    High Score: {}".format(score, high_score), align="center", font=("Courier", 16, "bold"))    
+    if score==target:
+        pen.clear()
+        pen.goto(0,0)
+        pen.write("Congrats! You are the snake master!",align="center",font=("Calibri",26,"bold"))
+        break
+    time.sleep(0.1)
 
 
-  
-    time.sleep(0.10)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
